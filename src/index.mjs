@@ -4,6 +4,7 @@ import { writeUsersToFile } from "../utils/fileUtil.js";
 
 const app = express();
 
+// Middleware to parse JSON in the request body
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -113,7 +114,31 @@ app.patch("/api/users/:id", (req, res) => {
 
   if (userIndex === -1) return res.sendStatus(404);
 
-  mockUsers[userIndex] = { ...mockUsers[userIndex], ...body, id: mockUsers[userIndex].id };
+  mockUsers[userIndex] = {
+    ...mockUsers[userIndex],
+    ...body,
+    id: mockUsers[userIndex].id,
+  };
+
+  // Write updated users array to db.js file
+  writeUsersToFile(mockUsers);
+
+  return res.sendStatus(200);
+});
+
+//8. Delete user by id (DELETE request)
+app.delete("/api/users/:id", (req, res) => {
+  const {
+    params: { id },
+  } = req;
+
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) return res.sendStatus(400);
+
+  const userIndex = mockUsers.findIndex((user) => user.id === parsedId);
+  if (userIndex === -1) return res.sendStatus(404);
+
+  mockUsers.splice(userIndex, 1);
 
   // Write updated users array to db.js file
   writeUsersToFile(mockUsers);

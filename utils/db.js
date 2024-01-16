@@ -48,15 +48,5 @@ export const users = [
     "id": 10,
     "username": "sarvesh",
     "displayName": "Sarvesh"
-  },
-  {
-    "id": 11,
-    "username": "rohan",
-    "displayName": "Rohan"
-  },
-  {
-    "id": 12,
-    "username": "niraj",
-    "displayName": "Niraj"
   }
 ]
