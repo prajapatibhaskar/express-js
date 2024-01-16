@@ -73,7 +73,7 @@ app.get("/api/products", (req, res) => {
   ]);
 });
 
-// 6. Update the user data
+// 6. Update the user data (PUT request)
 app.put("/api/users/:id", (req, res) => {
   const {
     body,
@@ -96,7 +96,29 @@ app.put("/api/users/:id", (req, res) => {
   // Write updated users array to db.js file
   writeUsersToFile(mockUsers);
 
-  return res.sendStatus(200)
+  return res.sendStatus(200);
+});
+
+//7. Update the user data (PATCH request)
+app.patch("/api/users/:id", (req, res) => {
+  const {
+    body,
+    params: { id },
+  } = req;
+
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) return res.sendStatus(400);
+
+  const userIndex = mockUsers.findIndex((user) => user.id === parsedId);
+
+  if (userIndex === -1) return res.sendStatus(404);
+
+  mockUsers[userIndex] = { ...mockUsers[userIndex], ...body };
+
+  // Write updated users array to db.js file
+  writeUsersToFile(mockUsers);
+
+  return res.sendStatus(200);
 });
 
 app.listen(PORT, () => {
