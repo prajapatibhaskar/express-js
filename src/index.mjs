@@ -1,7 +1,10 @@
-import express from "express";
+import express, { response } from "express";
 import { users } from "../utils/db.js";
+import { writeUsersToFile } from "../utils/fileUtil.js";
 
 const app = express();
+
+app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
@@ -22,9 +25,22 @@ app.get("/api/users", (req, res) => {
 
   if (filter && value)
     return res.send(mockUsers.filter((user) => user[filter].includes(value)));
-    
+
   // when filter and value is undefined
   return res.send(mockUsers);
+});
+
+// 5. Create a new user
+app.post("/api/users", (req, res) => {
+  const { body } = req;
+  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...body };
+
+  mockUsers.push(newUser);
+
+  // Write updated users array to db.js file
+  writeUsersToFile(mockUsers);
+
+  return res.status(201).send(newUser);
 });
 
 // 3. Get a specific user by id
