@@ -1,34 +1,31 @@
 import express from "express";
+import { users } from "../utils/db.js";
 
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-const mockUsers = [
-  {
-    id: 1,
-    username: "bhaskar",
-    displayName: "bhaskar",
-  },
-  {
-    id: 2,
-    username: "adam",
-    displayName: "adam",
-  },
-  {
-    id: 3,
-    username: "jack",
-    displayName: "jack",
-  },
-];
+const mockUsers = users;
 
 // 1. Home page
 app.get("/", (req, res) => {
   res.status(201).send({ message: "Hello" });
 });
 
-// 2. Get all users
-app.get("/api/users", (req, res) => res.send(mockUsers));
+// 2. Get all users (with query params if provided)
+app.get("/api/users", (req, res) => {
+  console.log(req.query);
+
+  const {
+    query: { filter, value },
+  } = req;
+
+  if (filter && value)
+    return res.send(mockUsers.filter((user) => user[filter].includes(value)));
+    
+  // when filter and value is undefined
+  return res.send(mockUsers);
+});
 
 // 3. Get a specific user by id
 app.get("/api/users/:id", (req, res) => {
