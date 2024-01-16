@@ -113,7 +113,7 @@ app.patch("/api/users/:id", (req, res) => {
 
   if (userIndex === -1) return res.sendStatus(404);
 
-  mockUsers[userIndex] = { ...mockUsers[userIndex], ...body };
+  mockUsers[userIndex] = { ...mockUsers[userIndex], ...body, id: mockUsers[userIndex].id };
 
   // Write updated users array to db.js file
   writeUsersToFile(mockUsers);
