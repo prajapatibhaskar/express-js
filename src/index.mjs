@@ -1,4 +1,4 @@
-import express, { response } from "express";
+import express from "express";
 import { users } from "../utils/db.js";
 import { writeUsersToFile } from "../utils/fileUtil.js";
 
@@ -71,6 +71,32 @@ app.get("/api/products", (req, res) => {
       price: "12.99",
     },
   ]);
+});
+
+// 6. Update the user data
+app.put("/api/users/:id", (req, res) => {
+  const {
+    body,
+    params: { id },
+  } = req;
+
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) {
+    return res.sendStatus(400);
+  }
+
+  const userIndex = mockUsers.findIndex((user) => user.id === parsedId);
+
+  if (userIndex === -1) {
+    return res.sendStatus(404);
+  }
+
+  mockUsers[userIndex] = { id: parsedId, ...body };
+
+  // Write updated users array to db.js file
+  writeUsersToFile(mockUsers);
+
+  return res.sendStatus(200)
 });
 
 app.listen(PORT, () => {
