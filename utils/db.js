@@ -1,7 +1,7 @@
 export const users = [
   {
     "id": 1,
-    "username": "bhaskarprajapati123",
+    "username": "bhaskarprajapati",
     "displayName": "bhaskar"
   },
   {
@@ -45,15 +45,6 @@ export const users = [
     "displayName": "Sarvesh"
   },
   {
-    "id": 11
-  },
-  {
-    "id": 12
-  },
-  {
-    "id": 13
-  },
-  {
     "id": 14,
     "username": "karan",
     "displayName": "Karan Kitchen"
@@ -85,6 +76,16 @@ export const users = [
   },
   {
     "id": 20,
+    "username": "rohit",
+    "displayName": "Rohit"
+  },
+  {
+    "id": 21,
+    "username": "rohit",
+    "displayName": "Rohit"
+  },
+  {
+    "id": 22,
     "username": "rohit",
     "displayName": "Rohit"
   }
