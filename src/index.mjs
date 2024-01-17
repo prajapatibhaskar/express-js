@@ -1,11 +1,48 @@
 import express from "express";
 import { users } from "../utils/db.js";
 import { writeUsersToFile } from "../utils/fileUtil.js";
+import {
+  query,
+  validationResult,
+  body,
+  matchedData,
+  checkSchema,
+} from "express-validator";
+import {
+  createUserValidationSchema,
+  getAllUsersValidation,
+} from "../utils/validationSchemas.mjs";
 
 const app = express();
 
 // Middleware to parse JSON in the request body
 app.use(express.json());
+
+const someRandomMiddleware = (req, res, next) => {
+  console.log(`${req.method} - ${req.url}`);
+  next();
+};
+
+// Middleware to get the userIndex after some validations
+const resolveUserIndexById = (req, res, next) => {
+  const {
+    params: { id },
+  } = req;
+
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) return res.sendStatus(400);
+
+  const userIndex = mockUsers.findIndex((user) => user.id === parsedId);
+
+  if (userIndex === -1) return res.sendStatus(404);
+
+  // we add this new property to the req object
+  req.userIndex = userIndex;
+  next();
+};
+
+// Applied Globally for each api after this line (Order matters)
+// app.use(someRandomMiddleware);
 
 const PORT = process.env.PORT || 3000;
 
@@ -17,9 +54,12 @@ app.get("/", (req, res) => {
 });
 
 // 2. Get all users (with query params if provided)
-app.get("/api/users", (req, res) => {
-  console.log(req.query);
+app.get("/api/users", checkSchema(getAllUsersValidation), (req, res) => {
+  const errors = validationResult(req);
+  console.log(errors);
+  if (!errors.isEmpty()) return res.status(400).send({ errors: errors.array() });
 
+  const data = matchedData(req);
   const {
     query: { filter, value },
   } = req;
@@ -31,10 +71,17 @@ app.get("/api/users", (req, res) => {
   return res.send(mockUsers);
 });
 
-// 5. Create a new user
-app.post("/api/users", (req, res) => {
-  const { body } = req;
-  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...body };
+// 3. Create a new user
+app.post("/api/users", checkSchema(createUserValidationSchema), (req, res) => {
+  const errors = validationResult(req);
+  console.log(errors);
+
+  // if result is not
+  if (!errors.isEmpty()) return res.status(400).send({ errors: errors.errors });
+
+  const data = matchedData(req);
+
+  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...data };
 
   mockUsers.push(newUser);
 
@@ -44,55 +91,19 @@ app.post("/api/users", (req, res) => {
   return res.status(201).send(newUser);
 });
 
-// 3. Get a specific user by id
-app.get("/api/users/:id", (req, res) => {
-  const parsedId = parseInt(req.params.id);
+// 4. Get a specific user by id
+app.get("/api/users/:id", resolveUserIndexById, (req, res) => {
+  const { userIndex } = req;
+  const user = mockUsers[userIndex];
 
-  // if id is not valid
-  if (isNaN(parsedId)) {
-    return res.status(400).send({
-      msg: "Bad Request. Invalid ID",
-    });
-  }
-
-  const findUser = mockUsers.find((user) => user.id === parsedId);
-
-  // if id is not found in mockUsers
-  if (!findUser) return res.status(404).send({ msg: "User not found" });
-
-  return res.send(findUser);
+  return res.send(user);
 });
 
-// 4. Get products
-app.get("/api/products", (req, res) => {
-  res.send([
-    {
-      id: 123,
-      name: "Chicken",
-      price: "12.99",
-    },
-  ]);
-});
+// 5. Update the user data (PUT request)
+app.put("/api/users/:id", resolveUserIndexById, (req, res) => {
+  const { body, userIndex } = req;
 
-// 6. Update the user data (PUT request)
-app.put("/api/users/:id", (req, res) => {
-  const {
-    body,
-    params: { id },
-  } = req;
-
-  const parsedId = parseInt(id);
-  if (isNaN(parsedId)) {
-    return res.sendStatus(400);
-  }
-
-  const userIndex = mockUsers.findIndex((user) => user.id === parsedId);
-
-  if (userIndex === -1) {
-    return res.sendStatus(404);
-  }
-
-  mockUsers[userIndex] = { id: parsedId, ...body };
+  mockUsers[userIndex] = { id: mockUsers[userIndex].id, ...body };
 
   // Write updated users array to db.js file
   writeUsersToFile(mockUsers);
@@ -100,19 +111,9 @@ app.put("/api/users/:id", (req, res) => {
   return res.sendStatus(200);
 });
 
-//7. Update the user data (PATCH request)
-app.patch("/api/users/:id", (req, res) => {
-  const {
-    body,
-    params: { id },
-  } = req;
-
-  const parsedId = parseInt(id);
-  if (isNaN(parsedId)) return res.sendStatus(400);
-
-  const userIndex = mockUsers.findIndex((user) => user.id === parsedId);
-
-  if (userIndex === -1) return res.sendStatus(404);
+// 6. Update the user data (PATCH request)
+app.patch("/api/users/:id", resolveUserIndexById, (req, res) => {
+  const { body, userIndex } = req;
 
   mockUsers[userIndex] = {
     ...mockUsers[userIndex],
@@ -126,17 +127,9 @@ app.patch("/api/users/:id", (req, res) => {
   return res.sendStatus(200);
 });
 
-//8. Delete user by id (DELETE request)
-app.delete("/api/users/:id", (req, res) => {
-  const {
-    params: { id },
-  } = req;
-
-  const parsedId = parseInt(id);
-  if (isNaN(parsedId)) return res.sendStatus(400);
-
-  const userIndex = mockUsers.findIndex((user) => user.id === parsedId);
-  if (userIndex === -1) return res.sendStatus(404);
+// 7. Delete user by id (DELETE request)
+app.delete("/api/users/:id", resolveUserIndexById, (req, res) => {
+  const { userIndex } = req;
 
   mockUsers.splice(userIndex, 1);
 

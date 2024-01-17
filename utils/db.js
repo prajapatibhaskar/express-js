@@ -30,11 +30,6 @@ export const users = [
     "displayName": "marlene"
   },
   {
-    "id": 7,
-    "username": "henry",
-    "displayName": "henry"
-  },
-  {
     "id": 8,
     "username": "nitish",
     "displayName": "Nitish"
@@ -48,5 +43,49 @@ export const users = [
     "id": 10,
     "username": "sarvesh",
     "displayName": "Sarvesh"
+  },
+  {
+    "id": 11
+  },
+  {
+    "id": 12
+  },
+  {
+    "id": 13
+  },
+  {
+    "id": 14,
+    "username": "karan",
+    "displayName": "Karan Kitchen"
+  },
+  {
+    "id": 15,
+    "username": "karan",
+    "displayName": "Karan Kitchen"
+  },
+  {
+    "id": 16,
+    "username": "karan",
+    "displayName": "Karan Kitchen"
+  },
+  {
+    "id": 17,
+    "username": "karan",
+    "displayName": "Karan Kitchen"
+  },
+  {
+    "id": 18,
+    "username": "karan",
+    "displayName": "Karan Kitchen"
+  },
+  {
+    "id": 19,
+    "username": "Action",
+    "displayName": "Action Jackson"
+  },
+  {
+    "id": 20,
+    "username": "rohit",
+    "displayName": "Rohit"
   }
 ]
